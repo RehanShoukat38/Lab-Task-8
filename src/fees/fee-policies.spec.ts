@@ -1,0 +1,2 @@
+import { StandardFeePolicy, MeritFeePolicy } from './fee-policies';
+describe('Fee policies', () => { it.each([2.9, 3.0, 3.5, 4.0])('standard cgpa %s', (cgpa) => expect(new StandardFeePolicy().calculate(12, cgpa, 5000)).toBe(60000)); it.each([[2.9, 60000], [3.0, 45000], [3.49, 45000], [3.5, 30000], [4, 30000]])('merit cgpa %s', (cgpa, total) => expect(new MeritFeePolicy().calculate(12, cgpa, 5000)).toBe(total)); });

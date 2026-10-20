@@ -1,0 +1,21 @@
+import { Test } from '@nestjs/testing';
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { CoursesService } from './courses.service';
+import { CreditService } from './credit.service';
+import { COURSE_STORE, InMemoryCourseStore } from './store/course-store';
+import { AppLogger } from '../common/logger';
+import { Department } from '../students/student.entity';
+const course = { code: 'CS-301', title: 'Web Development', creditHours: 3, instructor: 'Dr. Hamza', department: Department.ComputerScience };
+describe('CoursesService', () => {
+    let service: CoursesService;
+    const logger = { log: jest.fn() };
+    beforeEach(async () => { logger.log.mockClear(); const m = await Test.createTestingModule({ providers: [CoursesService, CreditService, { provide: COURSE_STORE, useValue: new InMemoryCourseStore([course]) }, { provide: AppLogger, useValue: logger }] }).compile(); service = m.get(CoursesService); });
+    it('lists courses', () => expect(service.findAll()).toEqual([course]));
+    it('finds a course', () => expect(service.findOne('CS-301')).toEqual(course));
+    it('rejects unknown course', () => expect(() => service.findOne('CS-999')).toThrow(NotFoundException));
+    it('creates and logs', () => { expect(service.create({ ...course, code: 'CS-420' }).code).toBe('CS-420'); expect(logger.log).toHaveBeenCalledWith('Created course CS-420'); });
+    it('rejects duplicate', () => expect(() => service.create(course)).toThrow(ConflictException));
+    it('deletes and logs', () => { service.remove('CS-301'); expect(service.findAll()).toEqual([]); expect(logger.log).toHaveBeenCalledWith('Deleted course CS-301'); });
+    it('filters, sorts and limits', () => { service.create({ ...course, code: 'CS-302', creditHours: 4 }); expect(service.findAll({ search: ' web ', minCredits: 4, sort: 'creditHours', order: 'desc', limit: 1 })).toEqual([]); expect(service.findAll({ minCredits: 4, limit: 1 })[0].code).toBe('CS-302'); });
+    it('reports overload boundary', () => { expect(service.stats()).toEqual({ totalCourses: 1, totalCredits: 3, overloaded: false }); expect(new CreditService().isOverloaded(18)).toBe(false); expect(new CreditService().isOverloaded(19)).toBe(true); });
+});

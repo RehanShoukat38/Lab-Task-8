@@ -1,0 +1,20 @@
+import { Test } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { COURSE_STORE, InMemoryCourseStore } from '../src/courses/store/course-store';
+import { createValidationPipe } from '../src/common/validation';
+import { Department } from '../src/students/student.entity';
+const course = { code: 'CS-301L', title: 'Web Lab', creditHours: 1, instructor: 'Dr. Hamza', department: Department.ComputerScience };
+describe('Courses and fees HTTP', () => {
+    let app: INestApplication;
+    beforeEach(async () => { const m = await Test.createTestingModule({ imports: [AppModule] }).overrideProvider(COURSE_STORE).useValue(new InMemoryCourseStore([course])).compile(); app = m.createNestApplication(); app.setGlobalPrefix('api'); app.useGlobalPipes(createValidationPipe()); await app.init(); });
+    afterEach(() => app.close());
+    it('lists and returns stats before dynamic route', async () => { await request(app.getHttpServer()).get('/api/courses').expect(200).expect([course]); await request(app.getHttpServer()).get('/api/courses/stats').expect(200).expect({ totalCourses: 1, totalCredits: 1, overloaded: false }); });
+    it('creates cleaned data and rejects duplicate', async () => { const data = { ...course, code: ' cs-420 ', title: ' Compilers ' }; await request(app.getHttpServer()).post('/api/courses').send(data).expect(201).expect(r => expect(r.body.code).toBe('CS-420')); await request(app.getHttpServer()).post('/api/courses').send(data).expect(409); });
+    it('rejects invalid and extra properties', async () => { await request(app.getHttpServer()).post('/api/courses').send({ ...course, creditHours: '3' }).expect(400); await request(app.getHttpServer()).post('/api/courses').send({ ...course, isAdmin: true }).expect(400); });
+    it('rejects code changes and validates params', async () => { await request(app.getHttpServer()).patch('/api/courses/CS-301L').send({ code: 'CS-999' }).expect(400); await request(app.getHttpServer()).get('/api/courses/abc').expect(400); await request(app.getHttpServer()).get('/api/courses/CS-999').expect(404); });
+    it('validates and applies queries', async () => { await request(app.getHttpServer()).get('/api/courses?minCredits=abc').expect(400); await request(app.getHttpServer()).get('/api/courses?sort=title').expect(400); await request(app.getHttpServer()).get('/api/courses?minCredits=2').expect(200).expect([]); });
+    it('replaces, patches and deletes', async () => { await request(app.getHttpServer()).put('/api/courses/CS-301L').send({ ...course, code: undefined, title: 'New title' }).expect(200); await request(app.getHttpServer()).patch('/api/courses/CS-301L').send({ creditHours: 2 }).expect(200).expect(r => expect(r.body.creditHours).toBe(2)); await request(app.getHttpServer()).delete('/api/courses/CS-301L').expect(204); await request(app.getHttpServer()).get('/api/courses/CS-301L').expect(404); });
+    it('validates fees and resolves the alias', async () => { await request(app.getHttpServer()).get('/api/fees/info').expect(200).expect({ policy: 'standard', ratePerCreditHour: 5000 }); await request(app.getHttpServer()).get('/api/fees/BSCS-023?creditHours=12').expect(200).expect(r => expect(r.body.total).toBe(60000)); await request(app.getHttpServer()).get('/api/fees/BSCS-023').expect(400); await request(app.getHttpServer()).get('/api/fees/unknown?creditHours=12').expect(404); });
+});

@@ -1,0 +1,44 @@
+[
+  {
+    "code": "CS-301",
+    "title": "Web Development",
+    "creditHours": 3,
+    "instructor": "Dr. Hamza Rauf",
+    "department": "Computer Science"
+  },
+  {
+    "code": "CS-301L",
+    "title": "Web Development Lab",
+    "creditHours": 1,
+    "instructor": "Dr. Hamza Rauf",
+    "department": "Computer Science"
+  },
+  {
+    "code": "CS-302",
+    "title": "Database Systems",
+    "creditHours": 3,
+    "instructor": "Dr. Hamza Rauf",
+    "department": "Computer Science"
+  },
+  {
+    "code": "CS-303",
+    "title": "Operating Systems",
+    "creditHours": 3,
+    "instructor": "Dr. Hamza Rauf",
+    "department": "Computer Science"
+  },
+  {
+    "code": "CS-304",
+    "title": "Computer Networks",
+    "creditHours": 3,
+    "instructor": "Dr. Hamza Rauf",
+    "department": "Computer Science"
+  },
+  {
+    "code": "CS-305",
+    "title": "Software Engineering",
+    "creditHours": 4,
+    "instructor": "Dr. Hamza Rauf",
+    "department": "Computer Science"
+  }
+]
