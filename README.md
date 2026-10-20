@@ -220,19 +220,7 @@ Add `CoursesService` to the **`exports`** array of `CoursesModule`, then **impor
 
 ---
 
-## 📸 Screenshots
 
-| Screenshot | Description |
-|---|---|
-| ![App Log](screenshots/app-log.png) | Server startup log |
-| ![Unit Tests](screenshots/npm-test.png) | 31 unit tests passing |
-| ![E2E Tests](screenshots/e2e.png) | 7 e2e tests passing |
-| ![Newman Run](screenshots/runner.png) | Newman: 21 requests, 35 assertions |
-| ![Validation](screenshots/validation.png) | Validation error responses |
-| ![Standard Fees](screenshots/standard-fees.png) | Standard fee response |
-| ![Merit Fees](screenshots/merit-fees.png) | Merit fee response |
-
----
 
 ## 📄 License
 
